@@ -2,7 +2,11 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
+
+def unlist(in_list):
+    return [j for i in in_list for j in i]
 
 class CraigslistExtractor:
     def __init__(self, browser_path, seller_type, search_term):
@@ -20,7 +24,7 @@ class CraigslistExtractor:
              random (boolean) - if result should be drawn random or not, optional, default is False
              seed (int) - seed number, only when random is True
 
-        return: all_info (list) - a list of all info, each info is in a dictionary
+        return: (dataframe) - a dataframe with all the info
         """
         if n is None:
             all_info = [self.extract_page_info(i) for i in tqdm(self.all_item_url)]
@@ -35,7 +39,7 @@ class CraigslistExtractor:
         elif (n is not None) and (random is False):
             all_info = [self.extract_page_info(i) for i in tqdm(self.all_item_url[:n])]
 
-        return all_info
+        return self.list_to_df(all_info)
 
     @staticmethod
     def get_page_source(browser_path, url):
@@ -112,13 +116,25 @@ class CraigslistExtractor:
             # all page link
             all_but_one_link = [self.composite_url(seller_type, search_term, i) for i in page_source_num]
             # all item url but page one
-            all_item_url_but_one = [self.get_page_item_url(get_page_source(browser_path, i)) for i in all_but_one_link]
+            all_item_url_but_one = [self.get_page_item_url(self.get_page_source(browser_path, i)) for i in all_but_one_link]
             all_item_url = first_page_url + [j for i in all_item_url_but_one for j in i]
         else:
             all_item_url = first_page_url
 
         return all_item_url
 
+    @staticmethod
+    def list_to_df(in_list):
+        """ transform a list of dicionary to dataframe
+
+        arg: in_list (list) - a list of dictionary
+
+        return: (dataframe) - a dataframe from the input list
+        """
+        all_col = list(set(unlist([list(i) for i in in_list])))
+        info_by_col = [[j.get(i) for i in all_col] for j in in_list]
+
+        return pd.DataFrame(info_by_col, columns=all_col)
 
     def extract_page_info(self, url):
         """ extract all info within an input url
@@ -156,9 +172,6 @@ class CraigslistExtractor:
             all_info = {i:j for i,j in zip(keys, values)}
 
             return all_info
-        
+
         except:
             return url
-
-
-
