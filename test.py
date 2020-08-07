@@ -1,4 +1,4 @@
-from scraper import *
+from craigslist_scraper import *
 import pandas as pd
 
 browser_path = './chromedriver'

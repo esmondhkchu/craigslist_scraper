@@ -1,6 +1,7 @@
 # Craigslist Scraper
 
-Test missing, in progress...
+Test missing...
+A little scraper to get data from Craigslist.
 
 ## usuage
 ``` python
@@ -9,6 +10,7 @@ Test missing, in progress...
                                location='sfbay', \
                                seller_type='cto', \
                                search_term='tesla')
+
 # to extract the search item info, example shows get 2 from random, if n is None, then will extract all
 >>> result = case.get_all_item_info(n=None, \
                                     random=False, \
